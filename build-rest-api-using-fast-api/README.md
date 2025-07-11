@@ -68,3 +68,17 @@ Open a browser and navigate to `localhost:8000` or `127.0.0.1:8000`. You should 
 
 ## CREATING ROUTES
 
+This demo app will be for a TO-DO list. In the file `main.py` I add:
+
+1. An array `items` which will be a global array.
+2. A POST endpoint To add TO-DO task to the list, with path `/items` and the function with the following signature: `create_item(item : str)`. The `item` parameter is a query parameter.
+
+Use the following command in the terminal to make the post request `curl.exe -X POST -H "Content-Type: application/json" "http://localhost:8000/items?item=apple"`. Note that you need to add the parameter as a query-parameter (?) and to add the parameter name ("item") and the value separated by an equal (=) sign.
+
+You should receive `"apple"` as a response.
+
+Then we can add another item using the same cURL command with a little modification: `curl.exe -X POST -H "Content-Type: application/json" "http://localhost:8000/items?item=orange"`.
+
+Add a GET endpoint to retrieve all the items, with path `/items` and a function with the following signature: `get_all()`. Don't worry that you have the same path as the POST request, its perfectly legal as long as they have something different, such as Path (URL) parameters, HTTP method, etc.
+
+Run again the 2 cURL commands to add "apple" and "orange" to the `items` array (since we added code the server/app was reloaded and all data reset). Then run the following cURL command to get the items list: `curl.exe -X GET -H "Content-Type: application/json" "http://localhost:8000/items"`. You should get a response `["apple", "orange"]` if you called "apple" first and then "orange".
