@@ -12,6 +12,11 @@ def root():
 def get_all():
    return items
 
+@app.get("/items/{item_id}")
+def get_by_id(item_id: int) -> str:
+   item = items[item_id]
+   return item
+
 @app.post('/items')
 def create_item(item : str):
    items.append(item)

@@ -82,3 +82,9 @@ Then we can add another item using the same cURL command with a little modificat
 Add a GET endpoint to retrieve all the items, with path `/items` and a function with the following signature: `get_all()`. Don't worry that you have the same path as the POST request, its perfectly legal as long as they have something different, such as Path (URL) parameters, HTTP method, etc.
 
 Run again the 2 cURL commands to add "apple" and "orange" to the `items` array (since we added code the server/app was reloaded and all data reset). Then run the following cURL command to get the items list: `curl.exe -X GET -H "Content-Type: application/json" "http://localhost:8000/items"`. You should get a response `["apple", "orange"]` if you called "apple" first and then "orange".
+
+Add an endpoint to retrieve a specific item by id (the index of the item in the `items` array), and a function with the following signature: `get_by_id(item_id: int) -> str`. This signature means the function name is "get_by_id", it receives a parameters `item_id` of type integer and returns a string.
+
+To test the endpoints we need to again add the items "apple" and "orange", the send the GET BY ID request to get the specific item use the following command `curl.exe -X GET -H "Content-Type: application/json" "http://localhost:8000/items/0"`.
+
+**IMPORTANT:** Remember that in the array the first item has the index (id) 0, the 2nd item id is 1, etc. To send the GET request 
