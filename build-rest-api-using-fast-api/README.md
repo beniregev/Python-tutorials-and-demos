@@ -21,7 +21,7 @@ Simply type "download and install Python on Windows 11" (replace "Windows 11" wi
 
 Open an PowerShell or command-line terminal and install `FastAPI` and `uvicorn` using the following commands:
 
-```powershell
+```powershell title="PowerShell"
 pip install fastapi
 pip install uvicorn
 ```
@@ -34,7 +34,7 @@ Inside the folder create a file `main.py` or any other name for your application
 
 In the file `main.py` paste the following code:
 
-```python
+```python title="Python"
 from fastapi import FastAPI
 
 app = FastAPI()
@@ -59,7 +59,7 @@ Resolve your issue and continue.
 
 Open a browser and navigate to `localhost:8000` or `127.0.0.1:8000`. You should get and see something similar to the following:
 
-```json
+```json title="JSON"
 {
   "Hello": "World"
 }
@@ -74,7 +74,7 @@ This demo app will be for a TO-DO list. In the file `main.py` I add:
 
 Use the following command in the terminal to make the post request:
 
-```powershell
+```PowerShell title="PowerShell"
 curl.exe -X POST -H "Content-Type: application/json" "http://localhost:8000/items?item=apple"
 ```
 
@@ -84,7 +84,7 @@ You should receive `"apple"` as a response.
 
 Then we can add another item using the same cURL command with a little modification:
 
-```powershell
+```powershell title="PowerShell"
 curl.exe -X POST -H "Content-Type: application/json" "http://localhost:8000/items?item=orange"
 ```
 
@@ -92,7 +92,7 @@ Add a GET endpoint to retrieve all the items, with path `/items` and a function 
 
 Run again the 2 cURL commands to add "apple" and "orange" to the `items` array (since we added code the server/app was reloaded and all data reset). Then run the following cURL command to get the items list:
 
-````powershell
+````powershell title="PowerShell"
 curl.exe -X GET -H "Content-Type: application/json" "http://localhost:8000/items"
 ```.
 
@@ -102,7 +102,7 @@ Add an endpoint to retrieve a specific item by id (the index of the item in the 
 
 To test the endpoints we need to again add the items "apple" and "orange", the send the GET BY ID request to get the specific item use the following command:
 
-``` powershell
+```powershell title="PowerShell"
 curl.exe -X GET -H "Content-Type: application/json" "http://localhost:8000/items/0"
 curl.exe -X GET -H "Content-Type: application/json" "http://localhost:8000/items/1"
 curl.exe -X GET -H "Content-Type: application/json" "http://localhost:8000/items/777"
@@ -125,13 +125,13 @@ In our case, we called a GET request with an id `777` which doesn't exists in th
 
 We will go to the `main.py` program and add `HTTPException` to import it from `fastapi`, the updated code will look as follow:
 
-```python
+```python title="Python"
 from fastapi import FastAPI, HTTPException
 ```
 
 And then down in the handler function `get_by_id(item_id: int) -> str` we will add a condition to check if the id exists and return it, or raise status code 404 with a suitable message:
 
-```python
+```python title="Python"
 @app.get("/items/{item_id}")
 def get_by_id(item_id: int) -> str:
    if item_id < len(items):
@@ -142,8 +142,8 @@ def get_by_id(item_id: int) -> str:
 
 Now, let's go back to our terminal, the program was reloaded thus we need to insert our items again, and then call the GET request with the id of `777` and check the response from the server. We should get a response similar to the following:
 
-```json
-{"detail":"Item not found"}
+```json title="JSON"
+{ "detail": "Item not found" }
 ```
 
 We can also determine the response content and populate it with the data we want, let's do a simple example.
@@ -153,9 +153,7 @@ We can also determine the response content and populate it with the data we want
   - Change the path to `'/items/id/{item_id}'`.
   - Change the code to return `JSONResponse` and the desired content.
 
-```markdown
-**Python**
-```python
+```python title="Python"
 @app.get("/items/id/{item_id}")
 def get_by_id(item_id: int) -> str:
    print(f"item id is {item_id}")
@@ -163,7 +161,7 @@ def get_by_id(item_id: int) -> str:
       return items[item_id]
    else:
       return JSONResponse(
-         status_code=404, 
+         status_code=404,
          content={
             "status": 404,
             "detail": "Item not fount"
@@ -172,12 +170,13 @@ def get_by_id(item_id: int) -> str:
 ```
 
 Then test the returned error by executing the following cURL command:
-```powershell
+
+```powershell title="PowerShell"
 curl.exe -X GET -H "Content-Type: application/json" "http://localhost:8000/items/id/777"
 ```
 
 Python will navigate the the correct function name, by the URL path although there are 2 functions with the same name and signature in the file. We should get a response as the following JSON object:
 
-```json
-{"status":404,"detail":"Item not fount"}
+```json title="JSON"
+{ "status": 404, "detail": "Item not fount" }
 ```
