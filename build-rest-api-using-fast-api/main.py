@@ -34,7 +34,11 @@ def get_by_id(item_id: int) -> str:
             "detail": "Item not fount"
          }
       )
-
+@app.get("/list-items")
+def list_items(limit: int = 10):
+   
+   return items[0:limit]
+   
 @app.post('/items')
 def create_item(item : str):
    items.append(item)

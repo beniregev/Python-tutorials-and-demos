@@ -180,3 +180,55 @@ Python will navigate the the correct function name, by the URL path although the
 ```json title="JSON"
 { "status": 404, "detail": "Item not fount" }
 ```
+
+## REQUEST AND PATH PARAMETERS
+
+We will create another function handler with the signature `list_items(limit: int = 10)` and path `"/list-items"`:
+
+```python
+@app.get("/list-items")
+def list_items(limit: int = 10):
+   
+   return items[0:limit]
+```
+
+Run the program again, this time create more than 10 items:
+
+```powershell
+curl.exe -X POST -H "Content-Type: application/json" "http://localhost:8000/items?item=apple"     
+"apple"
+curl.exe -X POST -H "Content-Type: application/json" "http://localhost:8000/items?item=orange"    
+"orange"
+curl.exe -X POST -H "Content-Type: application/json" "http://localhost:8000/items?item=banana"    
+"banana"
+curl.exe -X POST -H "Content-Type: application/json" "http://localhost:8000/items?item=peach"     
+"peach"
+curl.exe -X POST -H "Content-Type: application/json" "http://localhost:8000/items?item=date"
+"date"
+curl.exe -X POST -H "Content-Type: application/json" "http://localhost:8000/items?item=grapes"
+"grapes"
+curl.exe -X POST -H "Content-Type: application/json" "http://localhost:8000/items?item=watermelon"
+"watermelon"
+curl.exe -X POST -H "Content-Type: application/json" "http://localhost:8000/items?item=melon"
+"melon"
+curl.exe -X POST -H "Content-Type: application/json" "http://localhost:8000/items?item=grapefruit"
+"grapefruit"
+curl.exe -X POST -H "Content-Type: application/json" "http://localhost:8000/items?item=pineapple"
+"pineapple"
+curl.exe -X POST -H "Content-Type: application/json" "http://localhost:8000/items?item=coconut"
+"coconut"
+```
+
+Check the full list of items, the array should be 11 items:) `curl.exe -X GET -H "Content-Type: application/json" "http://localhost:8000/items"`.
+
+Run the following command in PowerShell the get 10 items (without the coconut) as the default limit value is 10:
+
+```powershell
+curl.exe -X GET "http://localhost:8000/list-items"
+```
+
+Run the following command to get the first 3 items:
+
+```powershell
+curl.exe -X GET "http://localhost:8000/list-items?limit=3"
+```
