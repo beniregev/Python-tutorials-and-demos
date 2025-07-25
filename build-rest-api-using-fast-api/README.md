@@ -24,7 +24,10 @@ Open an PowerShell or command-line terminal and install `FastAPI` and `uvicorn` 
 ```powershell title="PowerShell"
 pip install fastapi
 pip install uvicorn
+pip install pydantic
 ```
+
+OR in a single command: `pip install fastapi uvicorn pydantic`.
 
 ## CREATE THE APPLICATION
 
@@ -44,7 +47,11 @@ def root():
    return { "Hello": "World" }
 ```
 
-Go back to the terminal can run your application using the command `python -m uvicorn main:app --reload`.
+Go back to the terminal can run your application using the command 
+
+```powershell
+python -m uvicorn main:app --reload
+```
 
 - `python` to run your Python program, without it your system will look for `uvicorn` in the `PATH` environment variable.
 - `uvicorn` a Python package that allow you to run a Python program as a server.
@@ -188,35 +195,24 @@ We will create another function handler with the signature `list_items(limit: in
 ```python
 @app.get("/list-items")
 def list_items(limit: int = 10):
-   
+
    return items[0:limit]
 ```
 
 Run the program again, this time create more than 10 items:
 
 ```powershell
-curl.exe -X POST -H "Content-Type: application/json" "http://localhost:8000/items?item=apple"     
-"apple"
-curl.exe -X POST -H "Content-Type: application/json" "http://localhost:8000/items?item=orange"    
-"orange"
-curl.exe -X POST -H "Content-Type: application/json" "http://localhost:8000/items?item=banana"    
-"banana"
-curl.exe -X POST -H "Content-Type: application/json" "http://localhost:8000/items?item=peach"     
-"peach"
-curl.exe -X POST -H "Content-Type: application/json" "http://localhost:8000/items?item=date"
-"date"
-curl.exe -X POST -H "Content-Type: application/json" "http://localhost:8000/items?item=grapes"
-"grapes"
+curl.exe -X POST -H "Content-Type: application/json" "http://localhost:8000/items/query?item=apple"
+curl.exe -X POST -H "Content-Type: application/json" "http://localhost:8000/items/query?item=orange"
+curl.exe -X POST -H "Content-Type: application/json" "http://localhost:8000/items/query?item=banana"
+curl.exe -X POST -H "Content-Type: application/json" "http://localhost:8000/items/query?item=peach"
+curl.exe -X POST -H "Content-Type: application/json" "http://localhost:8000/items/query?item=date"
+curl.exe -X POST -H "Content-Type: application/json" "http://localhost:8000/items/query?item=grape"
 curl.exe -X POST -H "Content-Type: application/json" "http://localhost:8000/items?item=watermelon"
-"watermelon"
-curl.exe -X POST -H "Content-Type: application/json" "http://localhost:8000/items?item=melon"
-"melon"
-curl.exe -X POST -H "Content-Type: application/json" "http://localhost:8000/items?item=grapefruit"
-"grapefruit"
-curl.exe -X POST -H "Content-Type: application/json" "http://localhost:8000/items?item=pineapple"
-"pineapple"
-curl.exe -X POST -H "Content-Type: application/json" "http://localhost:8000/items?item=coconut"
-"coconut"
+curl.exe -X POST -H "Content-Type: application/json" "http://localhost:8000/items/query?item=melon"
+curl.exe -X POST -H "Content-Type: application/json" "http://localhost:8000/items/query?item=grapefruit"
+curl.exe -X POST -H "Content-Type: application/json" "http://localhost:8000/items/query?item=pineapple"
+curl.exe -X POST -H "Content-Type: application/json" "http://localhost:8000/items/query?item=coconut"
 ```
 
 Check the full list of items, the array should be 11 items:) `curl.exe -X GET -H "Content-Type: application/json" "http://localhost:8000/items"`.
@@ -232,3 +228,113 @@ Run the following command to get the first 3 items:
 ```powershell
 curl.exe -X GET "http://localhost:8000/list-items?limit=3"
 ```
+
+## MORE COMPLEX DATA-STRUCTURE -- USING PYDANTIC `BaseModel`
+
+If we want to build a TO-DO list application then the `item` and `items` must be a more complex data structure than just a string. Luckily, FastAPI also supports py models which allow us to structure our data and also provide additional validation. This makes testing, documentation, and code completion a lot easier.
+
+First let's import the `BaseModel` from `pydantic` at the top of the file.
+
+```python
+from pydantic import BaseModel
+```
+
+We will define the `Item` class in the "main.py" file right after the `app = FastAPI()`:
+
+```python
+class Item(BaseModel):
+   text: str = None
+   is_done: bool = False
+```
+
+Now, we will update the application to use the `Item` module. For example in the POST request endpoint, instead of receiving `def create_item(item: str)` we can change it to `def create_item(item: Item)`, and in the GET request endpoint instead of returning a string we can return the `Item` model:
+
+We will also add a POST endpoint to add multiple items to the `items` list using the `pydantic` model and a `JSONArray` in the POST request payload.
+
+```python
+# http://localhost:8000/items/string/{item-name}
+@app.post('/items/string/{item_name}')
+def create_item(item_name: str):
+   items.append(item_name)
+   return item_name
+
+# http://localhost:8000/items/model
+@app.post('/items/model')
+def create_item(item: Item):
+   items.append(item)
+   return item
+
+# http://localhost:8000/items/list-model
+@app.post('/items/list-model')
+def create_items(list_items: List[Item]):   # Notice the "List[Item]"
+   items.extend(list_items) # list1.extend(list2) ==> Add the items of list2 into list1
+   return list_items
+
+# http://localhost:8000/items/{item_id}
+@app.get("/items/{item_id}")
+def get_by_id(item_id: int) -> str:
+   print(f"item id is {item_id}")
+   if item_id < len(items):
+      return items[item_id]
+   else:
+      raise HTTPException(status_code=404, detail="Item not found")
+```
+
+If we try to use the same cURL request to create the a new item, it will not going to work because we specified the item as a query parameter, and when we use a modeled object like `Item` as part of the argument, it's going to expect that to be in the JSON payload of the request. 
+
+To make it work we need to send the `Item` data as a JSON payload instead of specifying a query parameter. We add the `Item` data with the `-d` switch and remove the query parameter. The cURL command will look as follow:
+
+```powershell
+curl.exe -X POST -H "Content-Type: application/json" -d '{"text": "apple"}' "http://localhost:8000/items"
+```
+
+OR
+
+```powershell
+curl.exe -X POST --url http://localhost:8000/items -H 'Content-Type: application/json' --data '{"text":"Orange"}'
+```
+
+## RESPONSE MODELS / MODEL THE RESPONSE
+
+We will use the same `pydantic` model and add a new argument `response_model` to the decorator.
+
+- To return a single Item class just put the class you want to return in the response, e.g.,  `response_model=Item`.
+- To return a list of classes just put `list[class-name]`, e.g., `response_model=list[Item]`.
+
+```python
+# http://localhost:8000/items/id/{item_id}
+@app.get("/items/id/{item_id}", response_model=Item)
+def get_by_id(item_id: int) -> str:
+   print(f"item id is {item_id}")
+   if item_id < len(items):
+      return items[item_id]
+   else:
+      return JSONResponse(
+         status_code=404, 
+         content={
+            "status": 404,
+            "detail": "Item not fount"
+         }
+      )
+      
+# return up-to LIMIT number of items (10 items by default)
+# http://localhost:8000/list-items
+@app.get("/list-items", response_model=list[Item])
+def list_items(limit: int = 10):
+   return items[0:limit]
+```
+
+## INTERACTIVE DOCUMENTATION
+
+FastAPI supports Swagger (OpenAPI 3.0) documentation standard. When using FastAPI, add `/docs#` to your application URL base and you will be able to see it. For example, for the `main.py` file the URL to the Swagger-UI page will be `http://localhost:8000/docs#`.
+
+In the Swagger-UI page you can click "Try it Out" on every request and test it.
+
+**Note:** If you add `/redoc` instead of `/docs#` you will get another set of documentation. It looks the same as Swagger-UI. Choose which ever one you prefer.
+
+## FASTAPI VS. FLASK
+
+- FastAPI is Async by default you can get much more concurrent requests right out of the box.
+- FastAPI is easier to use.
+- FastAPI is new, but gaining popularity quickly.
+- Flask has higher adoption (more people/developers use it), it's an Open Source project with community support.
