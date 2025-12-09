@@ -7,6 +7,13 @@ import sys
 # - Convert every pixel to an ASCII character with a similar intensity. 
 # - With each pixel converted to an ASCII character we can then construct the new ASCII art piece.  
 # - We will use Python Image Library (PIL) which we will import at the top of the program.
+# 
+# To run: 
+#  ```bash
+#  $ python script.py
+#  ```
+# 
+# Use the JPG file in the folder `1748613858636.jpg` as input.
 
 # ASCII character used to build the output text
 ASCII_CHARS = ["@", "#", "S", "%", "?", "*", "+", ";", ":", ",", "."]
